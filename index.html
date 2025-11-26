@@ -2,74 +2,57 @@
 <html lang="id">
 <head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Kuis Pengetahuan Umum</title>
+<title>Konverter Mata Uang</title>
 <style>
-  :root{--bg:#071029;--card:#0b1220;--accent:#60a5fa;--muted:#9aa7bf}
-  body{margin:0;font-family:Inter,Arial;background:linear-gradient(180deg,#03102a,#071426);color:#e6eef8;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-  .card{width:100%;max-width:720px;background:rgba(255,255,255,0.03);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
-  h1{margin:0 0 10px}
-  .question{font-size:18px;margin:14px 0}
-  .options{display:grid;gap:8px}
-  .option{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;cursor:pointer}
-  .option.selected{outline:2px solid var(--accent);background:rgba(96,165,250,0.08)}
-  .controls{display:flex;justify-content:space-between;margin-top:12px}
-  .score{font-weight:700}
+  body{font-family:Inter,Arial;background:#071024;color:#e6eef8;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+  .card{background:rgba(255,255,255,0.03);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);width:100%;max-width:420px}
+  input,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:inherit;margin-bottom:10px}
+  .result{margin-top:12px;font-weight:700}
+  .row{display:flex;gap:8px}
+  .row > *{flex:1}
+  button{padding:10px;border-radius:8px;border:0;background:#60a5fa;color:#04283a;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
   <div class="card">
-    <h1>Kuis Pengetahuan Umum</h1>
-    <div id="container"></div>
+    <h2>Konverter Mata Uang</h2>
+    <label>Jumlah</label>
+    <input type="number" id="amount" value="100"/>
+    <div class="row">
+      <select id="from">
+        <option value="USD">USD</option>
+        <option value="IDR">IDR</option>
+        <option value="EUR">EUR</option>
+        <option value="JPY">JPY</option>
+      </select>
+      <select id="to">
+        <option value="IDR">IDR</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="JPY">JPY</option>
+      </select>
+    </div>
+    <button id="convert">Konversi</button>
+    <div class="result" id="out">Hasil: -</div>
   </div>
 
 <script>
 (() => {
-  // Pertanyaan: minimal 5
-  const questions = [
-    {q:"Ibu kota Indonesia?", options:["Jakarta","Bandung","Surabaya","Yogyakarta"], a:0},
-    {q:"Planet terdekat ke Matahari?", options:["Venus","Merkurius","Bumi","Mars"], a:1},
-    {q:"Satuan panjang SI adalah?", options:["Meter","Liter","Gram","Watt"], a:0},
-    {q:"Bahasa pemrograman web di sisi klien?", options:["Python","JavaScript","C#","Java"], a:1},
-    {q:"Hewan mamalia dari pilihan?", options:["Ayam","Ikan","Sapi","Katak"], a:2}
-  ];
-
-  let idx=0;
-  let score=0;
-  const container = document.getElementById('container');
-
-  function render(){
-    container.innerHTML = '';
-    if(idx >= questions.length){
-      const el = document.createElement('div');
-      el.innerHTML = `<p class="score">Skor akhir: ${score} / ${questions.length}</p>
-      <p><button id="restart">Ulangi Kuis</button></p>`;
-      container.appendChild(el);
-      document.getElementById('restart').addEventListener('click', ()=>{ idx=0; score=0; render(); });
-      return;
-    }
-    const cur = questions[idx];
-    const qEl = document.createElement('div');
-    qEl.innerHTML = `<div class="question">Q${idx+1}. ${cur.q}</div>`;
-    const opts = document.createElement('div'); opts.className='options';
-    cur.options.forEach((op,i)=>{
-      const b = document.createElement('div'); b.className='option'; b.textContent = op;
-      b.addEventListener('click', ()=>{
-        // check answer
-        if(i===cur.a){ score++; b.style.borderColor='lime'; b.style.background='rgba(0,255,0,0.08)'; }
-        else { b.style.borderColor='tomato'; b.style.background='rgba(255,99,71,0.06)'; }
-        // disable all options
-        opts.querySelectorAll('.option').forEach(o=>o.style.pointerEvents='none');
-        // show next button
-        setTimeout(()=>{ idx++; render(); }, 900);
-      });
-      opts.appendChild(b);
-    });
-    qEl.appendChild(opts);
-    container.appendChild(qEl);
-    container.appendChild(document.createElement('div'));
-  }
-
-  render();
+  // hardcoded rates relative to 1 USD
+  const ratesUSD = { USD:1, IDR:15500, EUR:0.92, JPY:150 };
+  const amountEl = document.getElementById('amount');
+  const fromEl = document.getElementById('from');
+  const toEl = document.getElementById('to');
+  const out = document.getElementById('out');
+  document.getElementById('convert').addEventListener('click', ()=>{
+    const a = parseFloat(amountEl.value) || 0;
+    const from = fromEl.value;
+    const to = toEl.value;
+    // convert: amount -> USD -> target
+    const amountInUSD = a / ratesUSD[from];
+    const result = amountInUSD * ratesUSD[to];
+    out.textContent = `Hasil: ${result.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} ${to}`;
+  });
 })();
 </script>
 </body>
