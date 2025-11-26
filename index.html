@@ -1,108 +1,72 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>To-Do List Interaktif</title>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Kuis Pengetahuan Umum</title>
 <style>
-  :root{--bg:#0f1724;--card:#0b1220;--accent:#22c55e;--muted:#94a3b8}
-  body{font-family:Inter,Arial;margin:0;background:linear-gradient(180deg,#071024,#08102a);color:#e6eef8;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
-  .app{width:100%;max-width:720px}
-  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-  .glass{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);backdrop-filter: blur(6px);padding:18px;border-radius:12px;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
-  h1{margin:0;font-size:20px}
-  form{display:flex;gap:8px;margin-top:12px}
-  input[type="text"]{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
-  button{padding:10px 14px;border-radius:8px;border:0;background:linear-gradient(90deg,var(--accent),#9ef4b2);color:#042014;font-weight:700;cursor:pointer}
-  ul{list-style:none;padding:0;margin:14px 0}
-  li{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
-  .left{display:flex;align-items:center;gap:10px}
-  .task-title.completed{text-decoration:line-through;opacity:.6}
-  .controls button{margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit;padding:6px 8px;border-radius:6px;cursor:pointer}
-  .footer{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-top:8px}
+  :root{--bg:#071029;--card:#0b1220;--accent:#60a5fa;--muted:#9aa7bf}
+  body{margin:0;font-family:Inter,Arial;background:linear-gradient(180deg,#03102a,#071426);color:#e6eef8;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .card{width:100%;max-width:720px;background:rgba(255,255,255,0.03);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+  h1{margin:0 0 10px}
+  .question{font-size:18px;margin:14px 0}
+  .options{display:grid;gap:8px}
+  .option{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;cursor:pointer}
+  .option.selected{outline:2px solid var(--accent);background:rgba(96,165,250,0.08)}
+  .controls{display:flex;justify-content:space-between;margin-top:12px}
+  .score{font-weight:700}
 </style>
 </head>
 <body>
-  <div class="app">
-    <div class="glass header">
-      <h1>To-Do List Interaktif</h1>
-      <div class="meta">LocalStorage • Simple</div>
-    </div>
-
-    <div class="glass">
-      <form id="todoForm">
-        <input id="taskInput" type="text" placeholder="Tambahkan tugas baru..." required />
-        <button type="submit">Tambah</button>
-      </form>
-
-      <ul id="taskList" aria-live="polite"></ul>
-
-      <div class="footer">
-        <div id="stats">0 tugas</div>
-        <div>
-          <button id="clearDone">Hapus Selesai</button>
-          <button id="clearAll">Hapus Semua</button>
-        </div>
-      </div>
-    </div>
+  <div class="card">
+    <h1>Kuis Pengetahuan Umum</h1>
+    <div id="container"></div>
   </div>
 
 <script>
 (() => {
-  const KEY = 'minumin_todos_v1';
-  const form = document.getElementById('todoForm');
-  const input = document.getElementById('taskInput');
-  const listEl = document.getElementById('taskList');
-  const stats = document.getElementById('stats');
-  const clearDone = document.getElementById('clearDone');
-  const clearAll = document.getElementById('clearAll');
+  // Pertanyaan: minimal 5
+  const questions = [
+    {q:"Ibu kota Indonesia?", options:["Jakarta","Bandung","Surabaya","Yogyakarta"], a:0},
+    {q:"Planet terdekat ke Matahari?", options:["Venus","Merkurius","Bumi","Mars"], a:1},
+    {q:"Satuan panjang SI adalah?", options:["Meter","Liter","Gram","Watt"], a:0},
+    {q:"Bahasa pemrograman web di sisi klien?", options:["Python","JavaScript","C#","Java"], a:1},
+    {q:"Hewan mamalia dari pilihan?", options:["Ayam","Ikan","Sapi","Katak"], a:2}
+  ];
 
-  let tasks = JSON.parse(localStorage.getItem(KEY) || '[]');
-
-  function save(){ localStorage.setItem(KEY, JSON.stringify(tasks)); render(); }
-  function addTask(title){
-    tasks.push({id:Date.now(), title:title.trim(), done:false});
-    save();
-  }
-  function toggle(id){
-    tasks = tasks.map(t => t.id===id? {...t, done:!t.done} : t);
-    save();
-  }
-  function remove(id){
-    tasks = tasks.filter(t => t.id!==id);
-    save();
-  }
-  function clearCompleted(){ tasks = tasks.filter(t => !t.done); save(); }
-  function clearEverything(){ tasks = []; save(); }
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const v = input.value;
-    if(v.trim()) addTask(v);
-    input.value='';
-  });
-
-  clearDone.addEventListener('click', ()=>{ clearCompleted(); });
-  clearAll.addEventListener('click', ()=>{ if(confirm('Hapus semua tugas?')) clearEverything(); });
+  let idx=0;
+  let score=0;
+  const container = document.getElementById('container');
 
   function render(){
-    listEl.innerHTML='';
-    if(tasks.length===0){ listEl.innerHTML = '<li class="center">Belum ada tugas</li>'; }
-    tasks.forEach(t => {
-      const li = document.createElement('li');
-      const left = document.createElement('div'); left.className='left';
-      const chk = document.createElement('input'); chk.type='checkbox'; chk.checked = t.done; chk.addEventListener('change', ()=> toggle(t.id));
-      const title = document.createElement('div'); title.className='task-title'; title.textContent = t.title;
-      if(t.done) title.classList.add('completed');
-      left.appendChild(chk); left.appendChild(title);
-      const ctrl = document.createElement('div'); ctrl.className='controls';
-      const del = document.createElement('button'); del.textContent='Hapus'; del.addEventListener('click', ()=> { if(confirm('Hapus tugas?')) remove(t.id); });
-      ctrl.appendChild(del);
-      li.appendChild(left); li.appendChild(ctrl);
-      listEl.appendChild(li);
+    container.innerHTML = '';
+    if(idx >= questions.length){
+      const el = document.createElement('div');
+      el.innerHTML = `<p class="score">Skor akhir: ${score} / ${questions.length}</p>
+      <p><button id="restart">Ulangi Kuis</button></p>`;
+      container.appendChild(el);
+      document.getElementById('restart').addEventListener('click', ()=>{ idx=0; score=0; render(); });
+      return;
+    }
+    const cur = questions[idx];
+    const qEl = document.createElement('div');
+    qEl.innerHTML = `<div class="question">Q${idx+1}. ${cur.q}</div>`;
+    const opts = document.createElement('div'); opts.className='options';
+    cur.options.forEach((op,i)=>{
+      const b = document.createElement('div'); b.className='option'; b.textContent = op;
+      b.addEventListener('click', ()=>{
+        // check answer
+        if(i===cur.a){ score++; b.style.borderColor='lime'; b.style.background='rgba(0,255,0,0.08)'; }
+        else { b.style.borderColor='tomato'; b.style.background='rgba(255,99,71,0.06)'; }
+        // disable all options
+        opts.querySelectorAll('.option').forEach(o=>o.style.pointerEvents='none');
+        // show next button
+        setTimeout(()=>{ idx++; render(); }, 900);
+      });
+      opts.appendChild(b);
     });
-    const doneCount = tasks.filter(t=>t.done).length;
-    stats.textContent = `${tasks.length} tugas • ${doneCount} selesai`;
+    qEl.appendChild(opts);
+    container.appendChild(qEl);
+    container.appendChild(document.createElement('div'));
   }
 
   render();
